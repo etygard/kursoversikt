@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kursöversikt — HLI · VBL · UGN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#FAF7F1; --paper-raised:#FFFFFF; --ink:#241F1C; --ink-soft:#6B6259;
+    --line:#E7DFD2; --maroon:#8A2E2E; --maroon-soft:#F1DEDD;
+    --sage:#5C6B47; --sage-soft:#DDE5CC; --blue:#2B5AA0; --blue-soft:#D6E3F5;
+    --amber:#B4791F; --amber-soft:#F5E7D0; --shadow:0 4px 18px rgba(60,45,35,0.08);
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:950px; margin:0 auto; padding:26px 20px 70px; position:relative; }
+
+  header.top { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .logo {
+    width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#5C6B47,#8A2E2E);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-family:'Newsreader',serif; font-weight:600; font-size:18px; box-shadow:var(--shadow);
+  }
+  header.top h1 { font-family:'Newsreader',serif; font-weight:600; font-size:24px; margin:0; }
+  header.top p { margin:2px 0 0; color:var(--ink-soft); font-size:13px; }
+
+  nav.tabs { display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap; }
+  nav.tabs button {
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px; cursor:pointer;
+    border:1px solid var(--line); background:var(--paper-raised); color:var(--ink-soft);
+    border-radius:999px; padding:9px 18px; transition:all 0.15s ease;
+  }
+  nav.tabs button:hover { border-color:var(--maroon); color:var(--maroon); }
+  nav.tabs button.active { background:var(--maroon); border-color:var(--maroon); color:#fff; box-shadow:var(--shadow); }
+
+  section.panel { display:none; }
+  section.panel.active { display:block; }
+
+  .card { background:var(--paper-raised); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:16px 18px; }
+  .course-checks { display:flex; flex-wrap:wrap; gap:8px; }
+  .course-chip {
+    border:1px solid var(--line); border-radius:999px; padding:6px 13px; font-size:13px; font-weight:600;
+    cursor:pointer; background:var(--paper); color:var(--ink-soft); transition:all .15s ease;
+  }
+  .course-chip.active { color:#000 !important; border-color:transparent; box-shadow:var(--shadow); }
+
+  .month-heading {
+    font-family:'Newsreader',serif; font-weight:600; font-size:16px; color:var(--maroon);
+    margin:20px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--line);
+  }
+  .month-heading:first-child { margin-top:0; }
+
+  .sched-row {
+    display:flex; gap:12px; padding:10px 14px; margin-bottom:8px; border-radius:10px;
+    background:var(--paper-raised); border:1px solid var(--line); box-shadow:var(--shadow);
+  }
+  .sched-date { flex-shrink:0; width:64px; font-size:12.5px; color:var(--ink-soft); font-weight:600; }
+  .sched-date .week { display:block; font-size:10.5px; opacity:.8; }
+  .sched-items { flex:1; display:flex; flex-direction:column; gap:8px; }
+
+  .sched-badge {
+    display:flex; align-items:center; gap:10px; padding:9px 13px; border-radius:8px;
+    font-size:13px; font-weight:700; color:#000 !important; border:1px solid rgba(0,0,0,0.22);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  }
+  .sched-badge .course-tag {
+    font-size:11px; font-weight:800; padding:2px 7px; border-radius:4px;
+    background:#FFFFFF; color:#000; text-transform:uppercase; border:1px solid rgba(0,0,0,0.2);
+  }
+  .sched-badge .txt { line-height:1.3; color:#000 !important; }
+
+  .course-grid { display:grid; grid-template-columns:1fr; gap:14px; }
+  .course-card {
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; box-shadow:var(--shadow); border-top:5px solid var(--c);
+  }
+  .course-card h3 { font-family:'Newsreader',serif; font-size:19px; margin:0 0 10px; }
+
+  .entry { border:1px solid var(--line); border-radius:12px; padding:13px 16px; margin-bottom:10px; background:var(--paper-raised); box-shadow:var(--shadow); border-left:5px solid var(--c); }
+  .entry-top { display:flex; align-items:flex-start; gap:10px; }
+  .entry-top input[type=checkbox] { width:19px; height:19px; margin-top:2px; accent-color:var(--sage); cursor:pointer; }
+  .entry-title { font-family:'Newsreader',serif; font-size:16px; margin:0; font-weight:600; }
+  .entry.done .entry-title { text-decoration:line-through; opacity:0.6; }
+  .entry-meta { font-size:12px; color:var(--ink-soft); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; }
+  .entry-meta .pill { padding:1px 8px; border-radius:999px; background:var(--bg); color:#000; font-weight:700; border: 1px solid rgba(0,0,0,0.15); }
+  .entry-note { font-size:12.5px; color:var(--ink-soft); margin-top:6px; padding-left:29px; }
+
+  footer { margin-top:36px; font-size:11.5px; color:var(--ink-soft); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo">RS</div>
+    <div>
+      <h1>Kursöversikt</h1>
+      <p>HLI · VBL · UGN — Region Syd YH</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-panel="schema">Schema</button>
+    <button data-panel="kurser">Kurser & Modulfärger</button>
+    <button data-panel="checklista">Checklista — Moodle</button>
+  </nav>
+
+  <!-- FLIK 1: SCHEMA -->
+  <section class="panel active" id="panel-schema">
+    <div class="card" style="margin-bottom:16px">
+      <p style="margin:0 0 10px;font-size:13.5px;">Filtrera på kurs nedan. Färgen på varje ruta visar vilken modul som hör till händelsen:</p>
+      <div class="course-checks" id="schemaFilters"></div>
+    </div>
+    <div id="schemaList"></div>
+  </section>
+
+  <!-- FLIK 2: KURSER & MODULER -->
+  <section class="panel" id="panel-kurser">
+    <div class="card" style="margin-bottom:16px">
+      <p style="margin:0;font-size:13.5px;line-height:1.5">
+        Se färgen för din dag i schemat, matcha den med modulen nedan, och lägg in din video under motsvarande kategori i Moodle.
+      </p>
+    </div>
+    <div class="course-grid" id="courseGrid"></div>
+  </section>
+
+  <!-- FLIK 3: CHECKLISTA MOODLE -->
+  <section class="panel" id="panel-checklista">
+    <div class="card" style="margin-bottom:16px">
+      <p style="margin:0 0 6px;font-size:13.5px;">
+        Bocka av när en inspelning är publicerad i Moodle.
+      </p>
+    </div>
+    <div id="entryList"></div>
+  </section>
+
+  <footer>Kursöversikt och Gemensam planering — Region Syd YH</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var COURSES = {
+    "UGN25": { colour:"#92D050", bg:"#92D050", programme:"UGN" },
+    "UGN26": { colour:"#92D050", bg:"#92D050", programme:"UGN" },
+    "HLI25": { colour:"#FFFF00", bg:"#FFFF00", programme:"HLI" },
+    "HLI26": { colour:"#FFFF00", bg:"#FFFF00", programme:"HLI" },
+    "VBL25": { colour:"#33CCFF", bg:"#33CCFF", programme:"VBL" },
+    "VBL26": { colour:"#33CCFF", bg:"#33CCFF", programme:"VBL" }
+  };
+
+  // Färgerna nedan är mätta direkt från Excel-arket (Planering HT2026)
+  var MODULE_LEGEND = {
+    UGN: [
+      { colour:"#92D050", name:"Branschkunskap grön näring", poang:10 },
+      { colour:"#FFFF00", name:"Driftplanering i grön näring", poang:40 },
+      { colour:"#FCD5B4", name:"Ledarskap i driftplanering", poang:65 },
+      { colour:"#33CCFF", name:"Lärande i arbete (LIA 1 & 2)", poang:100 },
+      { colour:"#FFC000", name:"Hållbart affärsmannaskap", poang:40 },
+      { colour:"#538ED5", name:"Cirkulära affärsmodeller i grön näring", poang:25 },
+      { colour:"#C2D69A", name:"Digitala tekniker inom grön näring", poang:20 },
+      { colour:"#B2A1C7", name:"Examensarbete", poang:40 }
+    ],
+    HLI: [
+      { colour:"#FFFF00", name:"Hållbar livsmedelskedja", poang:30 },
+      { colour:"#92D050", name:"Initiera och driva livsmedelsprojekt", poang:20 },
+      { colour:"#FFC000", name:"Hållbart affärsmannaskap", poang:20 },
+      { colour:"#FCD5B4", name:"Cirkulära affärsmodeller och juridik", poang:20 },
+      { colour:"#538ED5", name:"Hållbara livsmedelsproduktionsmodeller", poang:40 },
+      { colour:"#C2D69A", name:"Livsmedelslogistik och försäljningskanaler", poang:30 },
+      { colour:"#33CCFF", name:"LIA (LIA 1 & 2)", poang:65 },
+      { colour:"#B2A1C7", name:"Examensarbete", poang:40 }
+    ],
+    VBL: [
+      { colour:"#FFFF00", name:"Hållbar livsmedelskedja", poang:15 },
+      { colour:"#E8E405", name:"Blåa ekosystem", poang:10 },
+      { colour:"#92D050", name:"Hållbart affärsmannaskap och projektledning (del 1)", poang:20 },
+      { colour:"#FFC000", name:"Hållbart affärsmannaskap och projektledning (del 2)", poang:20 },
+      { colour:"#538ED5", name:"Blå livsmedelsproduktion 1: Råvarukunskap", poang:50 },
+      { colour:"#C2D69A", name:"Blå livsmedelssäkerhet och livsmedelslagstiftning", poang:20 },
+      { colour:"#538ED5", name:"Blå livsmedelsproduktion 2: Förädling", poang:50 },
+      { colour:"#C2D69A", name:"Logistik och marknad", poang:10 },
+      { colour:"#33CCFF", name:"Lärande i arbete (LIA 1, 2, 3)", poang:75 },
+      { colour:"#B2A1C7", name:"Examensarbete", poang:30 }
+    ]
+  };
+
+  var SEED_ENTRIES = [
+    { day:"FM", topic:"Branschpresentationer HLI", course:"HLI26", where:"Zoom", done:false, note:"Läggs under Livsmedelslogistik." },
+    { day:"EM", topic:"Branschpresentationer VBL", course:"VBL26", where:"Zoom", done:false, note:"" },
+    { day:"Heldag", topic:"Gästföreläsning VBL26", course:"VBL26", where:"Zoom", done:false, note:"" },
+    { day:"Tis 22/9", topic:"Marint centrum", course:"HLI26", where:"Zoom", done:true, note:"Publicerad." }
+  ];
+
+  var SCHEMA_DATA = [{"m": "Augusti 2026", "d": "S 23", "w": "34", "e": {"HLI25": [{"t": "Terminsstart HLI25", "c": "#FFFFFF"}], "VBL25": [{"t": "Terminsstart VBL25", "c": "#FFFFFF"}]}}, {"m": "Augusti 2026", "d": "M 24", "w": "35", "e": {"UGN25": [{"t": "Terminsstart UGN25", "c": "#FFFFFF"}], "HLI25": [{"t": "Vad är logistik", "c": "#C2D69A"}], "VBL25": [{"t": "1 Ind studieuppgift RG upprop ISE", "c": "#538ED5"}]}}, {"m": "Augusti 2026", "d": "T 25", "w": "", "e": {"UGN25": [{"t": "Lia-gmg + ind studieuppgift", "c": "#FFFF00"}, {"t": "13:00 Utb.träff", "c": "#FFFF00"}], "HLI25": [{"t": "LIA-gmg", "c": "#C2D69A"}, {"t": "13:00 Utb.träff", "c": "#C2D69A"}], "VBL25": [{"t": "Lia-gmg", "c": "#538ED5"}, {"t": "13:00 Utb.träff", "c": "#538ED5"}]}}, {"m": "Augusti 2026", "d": "T 27", "w": "", "e": {"UGN25": [{"t": "Gmg branschdagar", "c": "#FFFF00"}, {"t": "Ind studieuppgift", "c": "#FFFF00"}]}}, {"m": "Augusti 2026", "d": "S 30", "w": "", "e": {"HLI25": [{"t": "LIA2 start", "c": "#FFFFFF"}]}}, {"m": "Augusti 2026", "d": "M 31", "w": "36", "e": {"UGN25": [{"t": "3 Branschdagar Uppsala", "c": "#D9D9D9"}], "HLI25": [{"t": "1", "c": "#33CCFF"}], "VBL25": [{"t": "kl 13 Torbjörn Ranta, Artic Roe", "c": "#538ED5"}], "HLI26": [{"t": "Utbildningsstart HLI26", "c": "#FFFFFF"}], "VBL26": [{"t": "Utbildningsstart VBL26", "c": "#FFFFFF"}]}}, {"m": "September 2026", "d": "T  1", "w": "", "e": {"UGN25": [{"t": "4 Branschdagar Sthlm", "c": "#D9D9D9"}], "HLI25": [{"t": "1", "c": "#33CCFF"}], "VBL25": [{"t": "kl 13 Krischan Kent", "c": "#538ED5"}]}}, {"m": "September 2026", "d": "O  2", "w": "", "e": {"HLI26": [{"t": "1 Upprop kl10 HLI26", "c": "#FFFF00"}]}}, {"m": "September 2026", "d": "T  3", "w": "", "e": {"VBL26": [{"t": "1 Upprop kl10 VBL26", "c": "#FFFF00"}]}}, {"m": "September 2026", "d": "S  6", "w": "", "e": {"VBL25": [{"t": "LIA3 start", "c": "#FFFFFF"}]}}, {"m": "September 2026", "d": "M  7", "w": "37", "e": {"UGN25": [{"t": "Start LIA2 UGN25", "c": "#FFFFFF"}], "HLI25": [{"t": "2 Stefan Sandernäs", "c": "#33CCFF"}], "VBL25": [{"t": "Krischan Kent - Frågestund", "c": "#538ED5"}], "UGN26": [{"t": "Utbildningsstart UGN26", "c": "#FFFFFF"}], "HLI26": [{"t": "Trädmetaforen + intro projekt (SN)", "c": "#FFC000"}, {"t": "HLI-workshopar", "c": "#FFC000"}], "VBL26": [{"t": "Trädmetaforen + intro projekt (SN)", "c": "#FFC000"}]}}, {"m": "September 2026", "d": "T  8", "w": "", "e": {"UGN25": [{"t": "1", "c": "#33CCFF"}], "HLI25": [{"t": "3", "c": "#33CCFF"}], "VBL25": [{"t": "1", "c": "#33CCFF"}], "HLI26": [{"t": "Värdekedja + uppgift (IO)", "c": "#FFFF00"}], "VBL26": [{"t": "Värdekedja + uppgift", "c": "#FFFF00"}, {"t": "VBL-workshopar (SN)", "c": "#FFC000"}]}}, {"m": "September 2026", "d": "T 10", "w": "", "e": {"UGN25": [{"t": "2", "c": "#33CCFF"}], "UGN26": [{"t": "Upprop UGN26", "c": "#FCD5B4"}, {"t": "Trädmetaforen", "c": "#FFFF00"}]}}, {"m": "September 2026", "d": "M 14", "w": "38", "e": {"HLI25": [{"t": "6 Branschpresentationer", "c": "#C2D69A"}], "VBL25": [{"t": "Branschpresentationer + kl 14 Nordic Seafarm, Fredrik Gröndahl", "c": "#538ED5"}], "HLI26": [{"t": "2 Branschpresentationer HLI25 + HLI24 + LGR", "c": "#FFC000"}], "VBL26": [{"t": "Branschpresentationer VBL25 + VBL24 + LGR + kl.14 Fredrik Granström, Nordic Seafarm", "c": "#FFC000"}]}}, {"m": "September 2026", "d": "T 15", "w": "", "e": {"UGN25": [{"t": "3", "c": "#33CCFF"}], "HLI25": [{"t": "4", "c": "#33CCFF"}], "VBL25": [{"t": "2", "c": "#33CCFF"}], "UGN26": [{"t": "IKIGAI", "c": "#FCD5B4"}], "HLI26": [{"t": "IKIGAI + presentationer Värdekedja", "c": "#FFFF00"}], "VBL26": [{"t": "IKIGAI + presentationer Värdekedja", "c": "#FFFF00"}]}}, {"m": "September 2026", "d": "T 17", "w": "", "e": {"UGN25": [{"t": "5 Branschpresentationer UGN26 + UGN25 + LGR", "c": "#FFFF00"}], "UGN26": [{"t": "1 Branschpresentationer UGN26 + UGN25 + LGR", "c": "#92D050"}]}}, {"m": "September 2026", "d": "M 21", "w": "39", "e": {"HLI25": [{"t": "5", "c": "#33CCFF"}], "VBL25": [{"t": "Individuell studieuppgift", "c": "#538ED5"}], "HLI26": [{"t": "Branschdagar Simrishamn", "c": "#D9D9D9"}], "VBL26": [{"t": "Branschdagar Simrishamn", "c": "#D9D9D9"}]}}, {"m": "September 2026", "d": "T 22", "w": "", "e": {"UGN25": [{"t": "4", "c": "#33CCFF"}], "HLI25": [{"t": "6", "c": "#33CCFF"}], "VBL25": [{"t": "3", "c": "#33CCFF"}], "UGN26": [{"t": "Gårdsfisk", "c": "#FFFF00"}], "HLI26": [{"t": "5 K-stad o Simrishamn", "c": "#D9D9D9"}], "VBL26": [{"t": "5 K-stad o Simrishamn", "c": "#D9D9D9"}]}}, {"m": "September 2026", "d": "T 24", "w": "", "e": {"UGN25": [{"t": "5", "c": "#33CCFF"}], "UGN26": [{"t": "2 CV o Personligt brev/ ev Jordhälsa", "c": "#92D050"}]}}, {"m": "September 2026", "d": "M 28", "w": "40", "e": {"HLI25": [{"t": "Presentationer Logistik", "c": "#C2D69A"}], "VBL25": [{"t": "Presentationer Logistik", "c": "#C2D69A"}, {"t": "Bo Ekstrand - intro", "c": "#538ED5"}], "UGN26": [{"t": "Lyssna in Presentationer Logistik", "c": "#FFFFFF"}], "HLI26": [{"t": "Lyssna in Presentationer Logistik", "c": "#FFFF00"}, {"t": "3 Refektioner Branschdagar Affärsmannaskap - Intro BMC + gruppuppgift", "c": "#FFC000"}], "VBL26": [{"t": "Lyssna in Presentationer Logistik", "c": "#FFFF00"}, {"t": "3 Refektioner Branschdagar Affärsmannaskap - Intro BMC + gruppuppgift", "c": "#FFC000"}]}}, {"m": "September 2026", "d": "T 29", "w": "", "e": {"UGN25": [{"t": "6", "c": "#33CCFF"}], "HLI25": [{"t": "Försäljningskanaler", "c": "#C2D69A"}], "VBL25": [{"t": "kl.14 Sjömat, Birger Wikström (SN)", "c": "#538ED5"}], "UGN26": [{"t": "Livslinjen + SFS Elin Frösell kl.11", "c": "#FCD5B4"}], "HLI26": [{"t": "Livslinjen + SFS Elin Frösell kl.11", "c": "#FFC000"}], "VBL26": [{"t": "Livslinjen + SFS Elin Frösell kl.11", "c": "#FFC000"}]}}, {"m": "Oktober 2026", "d": "T  1", "w": "", "e": {"UGN25": [{"t": "7", "c": "#33CCFF"}], "UGN26": [{"t": "Branschworkshop", "c": "#92D050"}]}}, {"m": "Oktober 2026", "d": "M  5", "w": "41", "e": {"HLI25": [{"t": "7", "c": "#33CCFF"}], "VBL25": [{"t": "Bo Ekstrand - intro", "c": "#538ED5"}], "HLI26": [{"t": "Krischan Kent (i VBL26)", "c": "#FFFF00"}], "VBL26": [{"t": "Krischan Kent (JN)", "c": "#FFFF00"}]}}, {"m": "Oktober 2026", "d": "T  6", "w": "", "e": {"UGN25": [{"t": "8", "c": "#33CCFF"}], "HLI25": [{"t": "8", "c": "#33CCFF"}], "VBL25": [{"t": "4", "c": "#33CCFF"}], "UGN26": [{"t": "Värderingar", "c": "#FCD5B4"}], "HLI26": [{"t": "Värderingar", "c": "#FFC000"}, {"t": "13. Klassmöte HLI26", "c": "#FFC000"}], "VBL26": [{"t": "Värderingar", "c": "#FFC000"}, {"t": "Intro Blå ekosystem", "c": "#E8E405"}]}}, {"m": "Oktober 2026", "d": "T  8", "w": "", "e": {"UGN25": [{"t": "9", "c": "#33CCFF"}], "UGN26": [{"t": "John Karlström, Södra", "c": "#92D050"}]}}, {"m": "Oktober 2026", "d": "M 12", "w": "42", "e": {"HLI25": [{"t": "9:30 Cecilia Tofterö", "c": "#C2D69A"}], "VBL25": [{"t": "Hailia Sidestreams", "c": "#538ED5"}, {"t": "Arbete med uppgift förädling", "c": "#538ED5"}], "HLI26": [{"t": "Hailia Sidestreams", "c": "#FFFF00"}, {"t": "Presentationer BMC etc", "c": "#FFFF00"}], "VBL26": [{"t": "Hailia Sidestreams", "c": "#FFFF00"}, {"t": "Presentationer BMC etc", "c": "#FFFF00"}]}}, {"m": "Oktober 2026", "d": "T 13", "w": "", "e": {"UGN25": [{"t": "10", "c": "#33CCFF"}], "HLI25": [{"t": "9", "c": "#33CCFF"}], "VBL25": [{"t": "5", "c": "#33CCFF"}], "UGN26": [{"t": "Presentationsteknik Daniel", "c": "#FCD5B4"}, {"t": "Mia Stuhre, Almedalsveckan", "c": "#FCD5B4"}], "HLI26": [{"t": "2 Presentationsteknik Daniel", "c": "#92D050"}, {"t": "Mia Stuhre, Almedalsveckan", "c": "#92D050"}], "VBL26": [{"t": "Presentationsteknik Daniel", "c": "#FFC000"}, {"t": "13:30 Gmg inför LIA - SN", "c": "#FFC000"}]}}, {"m": "Oktober 2026", "d": "T 15", "w": "", "e": {"UGN25": [{"t": "11 Obs flyttad till 16/10", "c": "#33CCFF"}], "UGN26": [{"t": "Obs flyttad till 16/10", "c": "#FFFFFF"}]}}, {"m": "Oktober 2026", "d": "F 16", "w": "", "e": {"UGN25": [{"t": "Konferens Torup förmiddag", "c": "#FFFF00"}], "UGN26": [{"t": "Konferens Torup förmiddag", "c": "#FFFF00"}]}}, {"m": "Oktober 2026", "d": "M 19", "w": "43", "e": {"HLI25": [{"t": "10", "c": "#33CCFF"}], "VBL25": [{"t": "6 obs flyttad 29/9", "c": "#33CCFF"}], "UGN26": [{"t": "Branschdagar", "c": "#D9D9D9"}], "HLI26": [{"t": "Branschdagar", "c": "#D9D9D9"}]}}, {"m": "Oktober 2026", "d": "T 20", "w": "", "e": {"UGN25": [{"t": "12", "c": "#33CCFF"}], "HLI25": [{"t": "11", "c": "#33CCFF"}], "VBL25": [{"t": "7", "c": "#33CCFF"}], "UGN26": [{"t": "Fredriksdal 8:30", "c": "#D9D9D9"}], "HLI26": [{"t": "Bjuv", "c": "#D9D9D9"}]}}, {"m": "Oktober 2026", "d": "O 21", "w": "", "e": {"VBL26": [{"t": "Intro ekosystemtjänster", "c": "#E8E405"}]}}, {"m": "Oktober 2026", "d": "T 22", "w": "", "e": {"UGN25": [{"t": "13", "c": "#33CCFF"}], "VBL26": [{"t": "13:30 klassmöte", "c": "#E8E405"}]}}, {"m": "Oktober 2026", "d": "M 26", "w": "44", "e": {"HLI25": [{"t": "12", "c": "#33CCFF"}], "VBL25": [{"t": "Presentationer", "c": "#538ED5"}], "HLI26": [{"t": "Medvetandenivåer + projektformuleringar", "c": "#FFC000"}], "VBL26": [{"t": "Medvetandenivåer", "c": "#FFC000"}, {"t": "14:30 - Avstämning LIA - PM", "c": "#FFC000"}]}}, {"m": "Oktober 2026", "d": "T 27", "w": "", "e": {"UGN25": [{"t": "14", "c": "#33CCFF"}], "HLI25": [{"t": "13", "c": "#33CCFF"}], "VBL25": [{"t": "8", "c": "#33CCFF"}], "UGN26": [{"t": "reflektioner Bjuv", "c": "#FCD5B4"}, {"t": "Elin Jönsson, Surkultur", "c": "#FCD5B4"}], "HLI26": [{"t": "reflektioner Bjuv", "c": "#FFFF00"}, {"t": "Elin Jönsson, Surkultur", "c": "#FFFF00"}], "VBL26": [{"t": "4", "c": "#E8E405"}]}}, {"m": "Oktober 2026", "d": "T 29", "w": "", "e": {"UGN25": [{"t": "15", "c": "#33CCFF"}], "UGN26": [{"t": "Jordhälsa, Jonas Nilsson", "c": "#FFFF00"}]}}, {"m": "November 2026", "d": "M  2", "w": "45", "e": {"HLI25": [{"t": "14", "c": "#33CCFF"}], "VBL25": [{"t": "9", "c": "#33CCFF"}], "HLI26": [{"t": "7 Lyssna in presentationer blå ekosystem", "c": "#FFC000"}, {"t": "Exposé Affärsmannaskap", "c": "#92D050"}], "VBL26": [{"t": "Presentationer blå ekosystem", "c": "#E8E405"}, {"t": "Exposé Affärsmannaskap", "c": "#92D050"}]}}, {"m": "November 2026", "d": "T  3", "w": "", "e": {"UGN25": [{"t": "6", "c": "#D9D9D9"}], "HLI25": [{"t": "10", "c": "#D9D9D9"}], "VBL25": [{"t": "15", "c": "#D9D9D9"}], "UGN26": [{"t": "9", "c": "#D9D9D9"}], "HLI26": [{"t": "8", "c": "#D9D9D9"}], "VBL26": [{"t": "7", "c": "#D9D9D9"}]}}, {"m": "November 2026", "d": "T  5", "w": "", "e": {"UGN25": [{"t": "Workshop: Skogens värden", "c": "#FFFF00"}, {"t": "Utvecklingsworkshop 13:30", "c": "#33CCFF"}], "HLI25": [{"t": "Utvecklingsworkshop 13:30", "c": "#FFFFFF"}], "VBL25": [{"t": "Utvecklingsworkshop 13:30", "c": "#FFFFFF"}], "UGN26": [{"t": "Workshop: Skogens värden", "c": "#FFFF00"}]}}, {"m": "November 2026", "d": "M  9", "w": "46", "e": {"HLI25": [{"t": "IDENTIFIERA & FÖRSTÅ", "c": "#C2D69A"}], "VBL25": [{"t": "IDENTIFIERA & FÖRSTÅ", "c": "#C2D69A"}], "HLI26": [{"t": "13. Jonas Karlsson, IKEA", "c": "#FFFF00"}], "VBL26": [{"t": "LIA", "c": "#33CCFF"}]}}, {"m": "November 2026", "d": "T 10", "w": "", "e": {"UGN25": [{"t": "17", "c": "#33CCFF"}], "HLI25": [{"t": "15", "c": "#33CCFF"}], "VBL25": [{"t": "10", "c": "#33CCFF"}], "UGN26": [{"t": "Anna Peterson Jordbrukets historia", "c": "#FFFF00"}, {"t": "14 Förändring - förbättring - förnyelse", "c": "#FCD5B4"}], "HLI26": [{"t": "Anna Peterson Jordbrukets historia", "c": "#FFFF00"}, {"t": "14 Förändring - förbättring - förnyelse", "c": "#FFFF00"}], "VBL26": [{"t": "LIA", "c": "#33CCFF"}, {"t": "14 Förändring, förbätttring - förnyelse", "c": "#FFFF00"}]}}, {"m": "November 2026", "d": "T 12", "w": "", "e": {"UGN25": [{"t": "18", "c": "#33CCFF"}], "UGN26": [{"t": "Ledarskap - aktivt lyssnande, coachande förhållningssätt, samtal och vision", "c": "#FCD5B4"}]}}, {"m": "November 2026", "d": "M 16", "w": "47", "e": {"HLI26": [{"t": "Flyttad till 26/11", "c": "#FFFFFF"}], "VBL26": [{"t": "LIA", "c": "#33CCFF"}]}}, {"m": "November 2026", "d": "T 17", "w": "", "e": {"UGN25": [{"t": "19", "c": "#33CCFF"}], "HLI25": [{"t": "16", "c": "#33CCFF"}], "VBL25": [{"t": "11", "c": "#33CCFF"}], "UGN26": [{"t": "Presentationer uppgift branschdagar", "c": "#FFFF00"}], "HLI26": [{"t": "Presentationer uppgift branschdagar", "c": "#FFFF00"}], "VBL26": [{"t": "LIA", "c": "#33CCFF"}]}}, {"m": "November 2026", "d": "T 19", "w": "", "e": {"UGN25": [{"t": "20", "c": "#33CCFF"}], "UGN26": [{"t": "Ledarskap - gemensamma förhållningssätt, gruppers utveckling och Johari-fönster", "c": "#FCD5B4"}]}}, {"m": "November 2026", "d": "M 23", "w": "48", "e": {"HLI25": [{"t": "VÄRDERA & ÅTGÄRDA", "c": "#C2D69A"}], "VBL25": [{"t": "VÄRDERA & ÅTGÄRDA", "c": "#C2D69A"}], "HLI26": [{"t": "Lyssna in LIA-presentationer VBL25", "c": "#FFC000"}], "VBL26": [{"t": "LIA presentationer - PM och ME", "c": "#33CCFF"}]}}, {"m": "November 2026", "d": "T 24", "w": "", "e": {"UGN25": [{"t": "21", "c": "#33CCFF"}], "HLI25": [{"t": "17", "c": "#33CCFF"}], "VBL25": [{"t": "12", "c": "#33CCFF"}], "UGN26": [{"t": "Kl. 10 Ledarskap - Arbetsorganisationen, arbetsmarknadens parter + Exposé Ledarskap", "c": "#FCD5B4"}], "HLI26": [{"t": "kl 9.00 Tenta", "c": "#FFC000"}], "VBL26": [{"t": "kl 9.00 Tenta", "c": "#FFC000"}]}}, {"m": "November 2026", "d": "O 25", "w": "", "e": {"HLI26": [{"t": "11", "c": "#FFC000"}], "VBL26": [{"t": "8", "c": "#FFC000"}]}}, {"m": "November 2026", "d": "T 26", "w": "", "e": {"UGN25": [{"t": "22", "c": "#33CCFF"}], "UGN26": [{"t": "15 Tenta", "c": "#FCD5B4"}]}}, {"m": "November 2026", "d": "F 27", "w": "", "e": {"UGN26": [{"t": "16 Tenta", "c": "#FCD5B4"}]}}, {"m": "November 2026", "d": "M 30", "w": "49", "e": {"HLI25": [{"t": "10.00 Presentationer + Exposé logistik & försäljningskanaler", "c": "#C2D69A"}, {"t": "Exjobbsidéer", "c": "#C2D69A"}], "VBL25": [{"t": "10.00 Presentationer + Exposé logistik & försäljningskanaler", "c": "#C2D69A"}, {"t": "Exjobbsidéer", "c": "#C2D69A"}], "HLI26": [{"t": "9 Tenta", "c": "#FFFF00"}], "VBL26": [{"t": "9:30 Tenta", "c": "#FFFF00"}]}}, {"m": "December 2026", "d": "T  1", "w": "", "e": {"UGN25": [{"t": "Jordbruksmetoder uppgift", "c": "#FFFF00"}], "HLI25": [{"t": "18", "c": "#33CCFF"}], "VBL25": [{"t": "13", "c": "#33CCFF"}], "UGN26": [{"t": "Jordbruksmetoder uppgift", "c": "#FFFF00"}], "HLI26": [{"t": "Hållbar livsmedelskedja", "c": "#FFFF00"}], "VBL26": [{"t": "Hållbar livsmedelskedja", "c": "#FFFF00"}, {"t": "Blå ekosystem", "c": "#E8E405"}]}}, {"m": "December 2026", "d": "M  7", "w": "50", "e": {"HLI25": [{"t": "9:30 Tenta", "c": "#C2D69A"}], "VBL25": [{"t": "9:30 Tenta", "c": "#C2D69A"}], "HLI26": [{"t": "10.30 Uppstart Hållbara Livsmedelsproduktionsmodeller SN", "c": "#538ED5"}], "VBL26": [{"t": "13:30 Uppstart Blå livsmedelsproduktion SN", "c": "#538ED5"}]}}, {"m": "December 2026", "d": "T  8", "w": "", "e": {"UGN25": [{"t": "9", "c": "#FFFF00"}], "HLI25": [{"t": "Tenta", "c": "#C2D69A"}], "VBL25": [{"t": "14", "c": "#33CCFF"}], "UGN26": [{"t": "8", "c": "#FFFF00"}], "VBL26": [{"t": "9:30-12 Jonas Nilsson - metoder primärproduktion", "c": "#538ED5"}]}}, {"m": "December 2026", "d": "T 10", "w": "", "e": {"UGN25": [{"t": "23 LIA2 presentationer", "c": "#33CCFF"}], "UGN26": [{"t": "9 LIA2-presentationer UGN25", "c": "#FFFF00"}]}}, {"m": "December 2026", "d": "F 11", "w": "", "e": {"UGN25": [{"t": "24 LIA2 presentationer", "c": "#33CCFF"}], "UGN26": [{"t": "10 LIA2-presentationer UGN25", "c": "#FFFF00"}]}}, {"m": "December 2026", "d": "M 14", "w": "51", "e": {"HLI25": [{"t": "19", "c": "#33CCFF"}], "VBL25": [{"t": "16 Ind studieuppgift", "c": "#538ED5"}], "HLI26": [{"t": "Uppstart cirkulära affärsmodeller + intro individuell studieuppgift SN", "c": "#FCD5B4"}], "VBL26": [{"t": "Bas 2 kl 13. Linda Sjömatsfrämjandet - JN", "c": "#538ED5"}]}}, {"m": "December 2026", "d": "T 15", "w": "", "e": {"UGN25": [{"t": "10 Presentationer Jordbruksmetoder", "c": "#FFFF00"}, {"t": "Uppstart Examensarbete", "c": "#B2A1C7"}], "HLI25": [{"t": "Uppstart Examensarbete", "c": "#B2A1C7"}], "VBL25": [{"t": "Uppstart Examensarbete", "c": "#B2A1C7"}], "UGN26": [{"t": "Presentationer Jordbruksmetoder", "c": "#FFFF00"}], "HLI26": [{"t": "Lyssna in på jordbruksmetoder", "c": "#FCD5B4"}], "VBL26": [{"t": "Bas 3 kl.13 Christian Ostrea - JN", "c": "#538ED5"}]}}, {"m": "December 2026", "d": "T 17", "w": "", "e": {"UGN25": [{"t": "11 Tenta Driftplanering", "c": "#FFFF00"}], "UGN26": [{"t": "11 Tenta Driftplanering", "c": "#FFFF00"}]}}, {"m": "December 2026", "d": "F 18", "w": "", "e": {"UGN25": [{"t": "12 Tenta Driftplanering", "c": "#FFFF00"}], "UGN26": [{"t": "12 Tenta Driftplanering", "c": "#FFFF00"}]}}, {"m": "December 2026", "d": "M 21", "w": "52", "e": {"HLI25": [{"t": "21", "c": "#33CCFF"}], "VBL25": [{"t": "17 Ind studieuppgift", "c": "#538ED5"}], "HLI26": [{"t": "3 Ind studieuppgift", "c": "#538ED5"}], "VBL26": [{"t": "Flyttad till 26/11", "c": "#FFFFFF"}]}}, {"m": "December 2026", "d": "T 22", "w": "", "e": {"UGN25": [{"t": "13 Ind studieuppgift inlämning", "c": "#FFFF00"}], "HLI25": [{"t": "22", "c": "#33CCFF"}], "VBL25": [{"t": "16", "c": "#33CCFF"}], "UGN26": [{"t": "Flyttad till v51", "c": "#FFFFFF"}], "HLI26": [{"t": "4 Ind studieuppgift", "c": "#538ED5"}], "VBL26": [{"t": "Flyttad till 8/1", "c": "#FFFFFF"}]}}, {"m": "December 2026", "d": "T 24", "w": "", "e": {"UGN25": [{"t": "Julafton", "c": "#FF0000"}], "UGN26": [{"t": "Julafton", "c": "#FF0000"}]}}, {"m": "December 2026", "d": "M 28", "w": "53", "e": {"HLI25": [{"t": "23", "c": "#33CCFF"}], "VBL25": [{"t": "18 Ind studieuppgift", "c": "#538ED5"}], "VBL26": [{"t": "Flyttad till 8/1", "c": "#FFFFFF"}], "HLI26": [{"t": "Ledigt", "c": "#FF0000"}]}}, {"m": "December 2026", "d": "T 29", "w": "", "e": {"UGN25": [{"t": "Flyttad till v51", "c": "#FFFFFF"}], "HLI25": [{"t": "24", "c": "#33CCFF"}], "VBL25": [{"t": "17", "c": "#33CCFF"}], "UGN26": [{"t": "Flyttad till v51", "c": "#FFFFFF"}], "HLI26": [{"t": "Ledigt", "c": "#FF0000"}], "VBL26": [{"t": "Ledigt", "c": "#FF0000"}]}}, {"m": "December 2026", "d": "T 31", "w": "", "e": {"UGN25": [{"t": "Nyårsafton", "c": "#FF0000"}], "UGN26": [{"t": "Nyårsafton", "c": "#FF0000"}]}}];
+
+  // TABBAR
+  document.querySelectorAll("nav.tabs button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll("nav.tabs button").forEach(function(b){ b.classList.remove("active"); });
+      document.querySelectorAll("section.panel").forEach(function(p){ p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("panel-" + btn.dataset.panel).classList.add("active");
+    });
+  });
+
+  // SCHEMA-RENDERING
+  var activeCourses = Object.keys(COURSES);
+  var filterBar = document.getElementById("schemaFilters");
+  Object.keys(COURSES).forEach(function(key){
+    var c = COURSES[key];
+    var chip = document.createElement("button");
+    chip.type = "button"; chip.className = "course-chip active"; chip.textContent = key;
+    chip.style.background = c.bg; chip.style.color = "#000";
+    chip.addEventListener("click", function(){
+      var idx = activeCourses.indexOf(key);
+      if (idx === -1) { activeCourses.push(key); chip.classList.add("active"); chip.style.background = c.bg; chip.style.color = "#000"; }
+      else { activeCourses.splice(idx, 1); chip.classList.remove("active"); chip.style.background = "transparent"; chip.style.color = "var(--ink-soft)"; }
+      renderSchema();
+    });
+    filterBar.appendChild(chip);
+  });
+
+  function renderSchema(){
+    var list = document.getElementById("schemaList");
+    list.innerHTML = "";
+    var lastMonth = null;
+    SCHEMA_DATA.forEach(function(row){
+      var courseKeys = Object.keys(row.e).filter(function(k){ return activeCourses.indexOf(k) !== -1; });
+      if (courseKeys.length === 0) return;
+      if (row.m !== lastMonth) {
+        var mh = document.createElement("div"); mh.className = "month-heading"; mh.textContent = row.m;
+        list.appendChild(mh); lastMonth = row.m;
+      }
+      var line = document.createElement("div"); line.className = "sched-row";
+      var dateCol = document.createElement("div"); dateCol.className = "sched-date"; dateCol.textContent = row.d;
+      if (row.w) { var wk = document.createElement("span"); wk.className = "week"; wk.textContent = "v." + row.w; dateCol.appendChild(wk); }
+      var itemsCol = document.createElement("div"); itemsCol.className = "sched-items";
+      courseKeys.forEach(function(ck){
+        row.e[ck].forEach(function(item){
+          var el = document.createElement("div");
+          el.className = "sched-badge";
+          el.setAttribute("style", "background-color: " + item.c + " !important;");
+
+          var courseTag = document.createElement("span");
+          courseTag.className = "course-tag";
+          courseTag.textContent = ck;
+
+          var span = document.createElement("span");
+          span.className = "txt";
+          span.textContent = item.t;
+
+          el.appendChild(courseTag);
+          el.appendChild(span);
+          itemsCol.appendChild(el);
+        });
+      });
+      line.appendChild(dateCol); line.appendChild(itemsCol); list.appendChild(line);
+    });
+  }
+  renderSchema();
+
+  // KURSER & MODULER
+  var grid = document.getElementById("courseGrid");
+  ["UGN", "HLI", "VBL"].forEach(function(prog){
+    var card = document.createElement("div"); card.className = "course-card";
+    card.style.setProperty("--c", prog === "UGN" ? "#92D050" : prog === "HLI" ? "#FFFF00" : "#33CCFF");
+    var h = document.createElement("h3"); h.textContent = prog + " — Färgkarta per modul";
+    card.appendChild(h);
+    (MODULE_LEGEND[prog] || []).forEach(function(m){
+      var row = document.createElement("div");
+      row.style.display = "flex"; row.style.alignItems = "center"; row.style.gap = "10px"; row.style.padding = "6px 0"; row.style.borderBottom = "1px solid var(--line)";
+      var sw = document.createElement("span"); sw.style.width = "18px"; sw.style.height = "18px"; sw.style.borderRadius = "4px"; sw.style.background = m.colour; sw.style.border = "1px solid rgba(0,0,0,0.15)";
+      var name = document.createElement("span"); name.textContent = m.name; name.style.flex = "1"; name.style.fontSize = "13px";
+      var pts = document.createElement("span"); pts.textContent = m.poang + "p"; pts.style.fontSize = "12px"; pts.style.fontWeight = "600";
+      row.appendChild(sw); row.appendChild(name); row.appendChild(pts); card.appendChild(row);
+    });
+    grid.appendChild(card);
+  });
+
+  // CHECKLISTA
+  var listEl = document.getElementById("entryList");
+  SEED_ENTRIES.forEach(function(e){
+    var c = COURSES[e.course] || { colour:"#FFFF00", bg:"#FFFF00" };
+    var entry = document.createElement("div");
+    entry.className = "entry" + (e.done ? " done" : "");
+    entry.style.setProperty("--c", c.colour);
+
+    var top = document.createElement("div"); top.className = "entry-top";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!e.done;
+    cb.addEventListener("change", function(){ entry.classList.toggle("done", cb.checked); });
+
+    var titleWrap = document.createElement("div");
+    var title = document.createElement("p"); title.className = "entry-title"; title.textContent = e.topic;
+    var meta = document.createElement("div"); meta.className = "entry-meta";
+    if (e.day) { var s = document.createElement("span"); s.textContent = e.day; meta.appendChild(s); }
+    var pill = document.createElement("span"); pill.className = "pill"; pill.style.background = c.bg; pill.textContent = e.course; meta.appendChild(pill);
+    if (e.where) { var w = document.createElement("span"); w.textContent = e.where; meta.appendChild(w); }
+
+    titleWrap.appendChild(title); titleWrap.appendChild(meta);
+    top.appendChild(cb); top.appendChild(titleWrap);
+    entry.appendChild(top);
+
+    if (e.note) {
+      var note = document.createElement("div"); note.className = "entry-note"; note.textContent = e.note;
+      entry.appendChild(note);
+    }
+    listEl.appendChild(entry);
+  });
+})();
+</script>
+</body>
+</html>
